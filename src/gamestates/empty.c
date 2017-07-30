@@ -26,6 +26,7 @@ struct GamestateResources {
 		// It gets created on load and then gets passed around to all other function calls.
 		ALLEGRO_FONT *font;
 		int blink_counter;
+		struct Character *dragon;
 };
 
 int Gamestate_ProgressCount = 1; // number of loading steps as reported by Gamestate_Load
@@ -36,6 +37,11 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 	if (data->blink_counter >= 60) {
 		data->blink_counter = 0;
 	}
+	AnimateCharacter(game, data->dragon, 1);
+	MoveCharacterF(game,data->dragon, -0.0025, 0, 0);
+	if (data->dragon->x < -0.2) {
+		SetCharacterPositionF(game, data->dragon, 1, 0.5, 0);
+	}
 }
 
 void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
@@ -45,6 +51,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 		al_draw_text(data->font, al_map_rgb(255,255,255), game->viewport.width / 2, game->viewport.height / 2,
 		             ALLEGRO_ALIGN_CENTRE, "Nothing to see here, move along!");
 	}
+	DrawCharacter(game, data->dragon, al_map_rgb(255,255,255), 0);
 }
 
 void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, ALLEGRO_EVENT *ev) {
@@ -62,6 +69,11 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	struct GamestateResources *data = malloc(sizeof(struct GamestateResources));
 	data->font = al_create_builtin_font();
 	progress(game); // report that we progressed with the loading, so the engine can draw a progress bar
+
+	data->dragon = CreateCharacter(game, "dragon");
+	RegisterSpritesheet(game, data->dragon, "walk");
+	LoadSpritesheets(game, data->dragon);
+
 	return data;
 }
 
@@ -69,6 +81,7 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	// Called when the gamestate library is being unloaded.
 	// Good place for freeing all allocated memory and resources.
 	al_destroy_font(data->font);
+	DestroyCharacter(game, data->dragon);
 	free(data);
 }
 
@@ -76,6 +89,8 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	// Called when this gamestate gets control. Good place for initializing state,
 	// playing music etc.
 	data->blink_counter = 0;
+	SelectSpritesheet(game, data->dragon, "walk");
+	SetCharacterPositionF(game, data->dragon, 1, 0.5, 0);
 }
 
 void Gamestate_Stop(struct Game *game, struct GamestateResources* data) {
