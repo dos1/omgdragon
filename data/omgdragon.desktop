@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=OMG Dragon!
+Exec=omgdragon
+Comment=OMG a game with dragons
+Icon=omgdragon
+Terminal=false
+Categories=Game;ArcadeGame;
