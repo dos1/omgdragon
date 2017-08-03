@@ -8,3 +8,4 @@ sync*
 *.user
 build-*
 .directory
+node_modules
